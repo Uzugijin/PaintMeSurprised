@@ -99,7 +99,6 @@ def Record(input_image, input_uv, temp_suffix, checkpoint_suffix):
 
     # Make copy of image and uv data
     clone = copyTexture(input_image, checkpoint_suffix)
-    #mask = copyTexture(input_image, temp_suffix+"_mask")
     transfer_pixels(input_image, clone.name)
     copyUVMAP(input_uv, checkpoint_suffix, input_image)
     uvmap_copy = copyUVMAP(input_uv, temp_suffix, input_image)
@@ -487,22 +486,6 @@ class UV_PT_PaintMeSurprised(bpy.types.Panel):
             row = layout.row(align=True)
             row.label(text="COMPROMISED", icon="ERROR")
         row = layout.row()
-
-        # if (len(matching_objects) == 1 or
-        #     (all(obj in matching_objects for obj in selected_objectos) and
-        #     all(obj in selected_objectos for obj in matching_objects)) or
-        #     pms_props.image_mode == 'transfer') and \
-        #     all(user in matching_objects for user in image_users):
-        #     row.label(text="Transfer (A->B)", icon="RENDERLAYERS")
-        # elif (pms_props.image_mode == 'mix' or
-        #     len(matching_objects) > 1 or
-        #     any(obj not in matching_objects for obj in selected_objectos)):
-        #     row.label(text="Mixing (A+B)", icon="RENDERLAYERS")
-        # else:
-        #     row.label(text="Mixing (A+B)", icon="RENDERLAYERS")
-
-
-        
         if pms_props.image_mode == 'transfer':
             row.label(text="Transfer (A->B)", icon="RENDERLAYERS")
         elif pms_props.image_mode == 'mix':
@@ -519,16 +502,6 @@ class UV_PT_PaintMeSurprised(bpy.types.Panel):
             row.label(text="Mixing (A+B)", icon="RENDERLAYERS")
         else:
             row.label(text="Mixing (A+B)", icon="RENDERLAYERS")
-
-
-
-
-
-
-
-
-
-
         row = layout.row()
         row.prop(pms_props, "image_mode", text="")
                
@@ -578,10 +551,8 @@ class RecOperator(bpy.types.Operator):
         Record(pms_props.input_image, pms_props.input_uv, pms_props.temp_suffix, pms_props.checkpoint_suffix)
         bpy.ops.image.save_all_modified()
         bpy.ops.object.mode_set(mode='EDIT')
-        #bpy.ops.uv.copy()
         pms_props.safe_to_run = 1
-        pms_props.lock = False
-        #connectNodesForBaking(pms_props.input_image, pms_props.temp_suffix)        
+        pms_props.lock = False   
         return {'FINISHED'}
 
 class StopOperator(bpy.types.Operator):
