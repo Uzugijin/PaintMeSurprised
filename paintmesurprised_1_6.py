@@ -28,7 +28,7 @@ class PMS_Properties(bpy.types.PropertyGroup):
     temp_suffix : bpy.props.StringProperty(name="temp_suffix", default="_temp_pms")
     checkpoint_suffix : bpy.props.StringProperty(name="checkpoint_suffix", default="_pms_checkpoint")
     mix_method : bpy.props.BoolProperty(name="Always Mix", default=True)
-    image_mode : bpy.props.EnumProperty(name="Image Algorithm", items=[("none", "Automatic", ""),("mix", "Always Mix", ""), ("transfer", "Always Transfer", "")], default="none")
+    image_mode : bpy.props.EnumProperty(name="Image Algorithm", description="Pixel exchange method between temporary and original images", items=[("none", "Automatic", ""),("mix", "Always Mix", ""), ("transfer", "Always Transfer", "")], default="none")
 
 def np_array_from_image(img_name):
     img = bpy.data.images[img_name]
