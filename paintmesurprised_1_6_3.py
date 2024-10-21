@@ -424,86 +424,89 @@ class UV_PT_PaintMeSurprised(bpy.types.Panel):
         matching_objects = get_matching_objects(pms_props.input_uv, pms_props.input_image)
         selected_objectos = bpy.context.selected_objects
         image_users = get_image_users(pms_props.input_image)
-        
-        if pms_props.safe_to_run == 0 and (checkpoint_uv in obj.data.uv_layers or checkpoint_image in bpy.data.images):
+        if all(obj.type == 'MESH' for obj in bpy.context.selected_objects) and obj.type == 'MESH':
+            if pms_props.safe_to_run == 0 and (checkpoint_uv in obj.data.uv_layers or checkpoint_image in bpy.data.images):
+                row = layout.row(align=True)
+                row.operator("wm.reload_operator", text="Last Checkpoint", icon="FILE_REFRESH")
+            else:
+                layout.separator(factor=3.4)
+
+            col = layout.column(align=True)
+            col.prop(pms_props, "input_image")
+            col.prop(pms_props, "input_uv")
             row = layout.row(align=True)
-            row.operator("wm.reload_operator", text="Last Checkpoint", icon="FILE_REFRESH")
-        else:
-            layout.separator(factor=3.4)
+            row.label(text="Linked: "+str(len(matching_objects)))
+            row.label(text="Img_usr: "+str(len(image_users)))
+            
+            temp_image = pms_props.input_image + pms_props.checkpoint_suffix
+            temp_uv = pms_props.input_uv + pms_props.checkpoint_suffix
 
-        col = layout.column(align=True)
-        col.prop(pms_props, "input_image")
-        col.prop(pms_props, "input_uv")
-        row = layout.row(align=True)
-        row.label(text="Linked: "+str(len(matching_objects)))
-        row.label(text="Img_usr: "+str(len(image_users)))
-        
-        temp_image = pms_props.input_image + pms_props.checkpoint_suffix
-        temp_uv = pms_props.input_uv + pms_props.checkpoint_suffix
-
-        col = layout.column()
-        for obj5 in matching_objects:
-            #if obj not in bpy.context.selected_objects or obj5 != bpy.context.active_object:
-            col.label(text=obj5.name, icon="OBJECT_DATA")
-        row = layout.row()
-        if matching_objects:
-            if bpy.context.selected_objects:
-                if any(obj in matching_objects for obj in bpy.context.selected_objects):
-                    row.alert = True
-                    row.label(text="Selection:")
-                    row.label(text=obj.name, icon="OBJECT_DATA")
+            col = layout.column()
+            for obj5 in matching_objects:
+                #if obj not in bpy.context.selected_objects or obj5 != bpy.context.active_object:
+                col.label(text=obj5.name, icon="OBJECT_DATA")
+            row = layout.row()
+            if matching_objects:
+                if bpy.context.selected_objects:
+                    if any(obj in matching_objects for obj in bpy.context.selected_objects):
+                        row.alert = True
+                        row.label(text="Selection:")
+                        row.label(text=obj.name, icon="OBJECT_DATA")
+                    else:
+                        row.alert = True
+                        row.label(text="Selection:")
+                        row.label(text="---", icon="ERROR")
                 else:
                     row.alert = True
                     row.label(text="Selection:")
                     row.label(text="---", icon="ERROR")
             else:
-                row.alert = True
-                row.label(text="Selection:")
-                row.label(text="---", icon="ERROR")
-        else:
-            row.label(text="No match found!", icon="ERROR")
-        row = layout.row()
-        if pms_props.safe_to_run == 0:
-            col = row.column()
-            col.alert = False
-            col.operator("wm.rec_operator", text="Record", icon="UV")
-            row = layout.row(align=True)
-            if any(obj in matching_objects for obj in bpy.context.selected_objects):
-                row.label(text="Ready", icon="INFO")
+                row.label(text="No match found!", icon="ERROR")
+            row = layout.row()
+            if pms_props.safe_to_run == 0:
+                col = row.column()
+                col.alert = False
+                col.operator("wm.rec_operator", text="Record", icon="UV")
+                row = layout.row(align=True)
+                if any(obj in matching_objects for obj in bpy.context.selected_objects):
+                    row.label(text="Ready", icon="INFO")
+                else:
+                    row.label(text="Unavailable", icon="INFO")
+            elif pms_props.safe_to_run == 1 and (temp_image in bpy.data.images and temp_uv in obj.data.uv_layers):
+                col = row.column()
+                col.alert = True
+                col.operator("wm.stop_operator", text="Stop", icon="REC")
+                row.operator("wm.cleanup_operator", text="", icon="CANCEL")
+                row = layout.row(align=True)
+                row.label(text="Recording...", icon="INFO")
+            else:   
+                col = row.column()
+                col.alert = False
+                row.operator("wm.recover_operator", text="Restart", icon="FILE_REFRESH")
+                row = layout.row(align=True)
+                row.label(text="COMPROMISED", icon="ERROR")
+            row = layout.row()
+            if pms_props.image_mode == 'transfer':
+                row.label(text="Transfer (A->B)", icon="RENDERLAYERS")
+            elif pms_props.image_mode == 'mix':
+                row.label(text="Mixing (A+B)", icon="RENDERLAYERS")
+            elif (len(matching_objects) == 1 or
+                (all(obj in matching_objects for obj in selected_objectos) and
+                all(obj in selected_objectos for obj in matching_objects) and
+                all(user in matching_objects for user in image_users) and
+                all(user in selected_objectos for user in image_users))):
+                row.label(text="Transfer (A->B)", icon="RENDERLAYERS")
+            elif (len(matching_objects) > 1 or
+                any(obj not in matching_objects for obj in selected_objectos) or
+                any(user not in matching_objects for user in image_users)):
+                row.label(text="Mixing (A+B)", icon="RENDERLAYERS")
             else:
-                row.label(text="Unavailable", icon="INFO")
-        elif pms_props.safe_to_run == 1 and (temp_image in bpy.data.images and temp_uv in obj.data.uv_layers):
-            col = row.column()
-            col.alert = True
-            col.operator("wm.stop_operator", text="Stop", icon="REC")
-            row.operator("wm.cleanup_operator", text="", icon="CANCEL")
-            row = layout.row(align=True)
-            row.label(text="Recording...", icon="INFO")
-        else:   
-            col = row.column()
-            col.alert = False
-            row.operator("wm.recover_operator", text="Restart", icon="FILE_REFRESH")
-            row = layout.row(align=True)
-            row.label(text="COMPROMISED", icon="ERROR")
-        row = layout.row()
-        if pms_props.image_mode == 'transfer':
-            row.label(text="Transfer (A->B)", icon="RENDERLAYERS")
-        elif pms_props.image_mode == 'mix':
-            row.label(text="Mixing (A+B)", icon="RENDERLAYERS")
-        elif (len(matching_objects) == 1 or
-            (all(obj in matching_objects for obj in selected_objectos) and
-            all(obj in selected_objectos for obj in matching_objects) and
-            all(user in matching_objects for user in image_users) and
-            all(user in selected_objectos for user in image_users))):
-            row.label(text="Transfer (A->B)", icon="RENDERLAYERS")
-        elif (len(matching_objects) > 1 or
-            any(obj not in matching_objects for obj in selected_objectos) or
-            any(user not in matching_objects for user in image_users)):
-            row.label(text="Mixing (A+B)", icon="RENDERLAYERS")
+                row.label(text="Mixing (A+B)", icon="RENDERLAYERS")
+            row = layout.row()
+            row.prop(pms_props, "image_mode", text="")
         else:
-            row.label(text="Mixing (A+B)", icon="RENDERLAYERS")
-        row = layout.row()
-        row.prop(pms_props, "image_mode", text="")
+            row = layout.row()
+            layout.label(text="Not a mesh object!", icon="ERROR")
                
 class RecOperator(bpy.types.Operator):
     bl_idname = "wm.rec_operator"
