@@ -485,8 +485,8 @@ class ReloadOperator(bpy.types.Operator):
 
 class Focus_on_Image(bpy.types.Operator):
     bl_idname = "wm.focus_on_image"
-    bl_label = "Focus on Image"
-    bl_description = "Focus on Image"
+    bl_label = "Select Image"
+    bl_description = "Select Image in the UV/Image Editor"
     bl_options = {'INTERNAL'}
 
     def execute(self, context):
@@ -552,6 +552,7 @@ class UV_request(bpy.types.Operator):
 class CleanPreviewOperator(bpy.types.Operator):
     bl_idname = "wm.resize_image"
     bl_label = "Resize Image"
+    bl_description = "Turn off overlays and set image interpolation to Linear"
     bl_options = {'INTERNAL'}
 
     def execute(self, context):
@@ -754,7 +755,7 @@ class UV_PT_PaintMeSurprised(bpy.types.Panel):
                 col = layout.column(align=True)
                 row = col.row(align=True)
                 row.prop(pms_props, "input_image")
-                row.operator("wm.focus_on_image", text="", icon="HIDE_OFF")
+                row.operator("wm.focus_on_image", text="", icon="CURSOR")
                 col.prop(pms_props, "input_uv")
                 row = layout.row(align=True)
                 row.label(text="Linked: "+str(len(matching_objects)))
