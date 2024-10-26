@@ -411,9 +411,13 @@ def remove_checkpoint_data(checkpoint_suffix, input_uv, input_image):
 
     # Remove any existing _pms_checkpoint UV maps
     matching_objects = get_matching_objects(input_uv, input_image)
+    
+    print(matching_objects)
+    
     for obj in matching_objects:
         for uv_map in obj.data.uv_layers:
-            if checkpoint_suffix in uv_map.name:
+            target_uv_map_name = f"{input_uv}{checkpoint_suffix}"
+            if uv_map.name == target_uv_map_name:
                 obj.data.uv_layers.remove(uv_map)
 
 class CleanupOperator(bpy.types.Operator):
