@@ -94,10 +94,15 @@ def copyTexture(input_image, suffix):
     return copy_texture
 
 def copyUVMAP(input_uv, suffix, input_image):
+    processed_meshes = set()
+    uvmap_copies = []
     for obj in get_image_users(input_image):
-        uvmap_copy = obj.data.uv_layers.new()
-        uvmap_copy.name = f"{input_uv}{suffix}"
-    return uvmap_copy
+        if obj.data not in processed_meshes:
+            processed_meshes.add(obj.data)
+            uvmap_copy = obj.data.uv_layers.new()
+            uvmap_copy.name = f"{input_uv}{suffix}"
+            uvmap_copies.append(uvmap_copy)
+    return uvmap_copies
     
 def Record(input_image, input_uv, temp_suffix, checkpoint_suffix):
     obj = bpy.context.object
@@ -117,8 +122,8 @@ def Record(input_image, input_uv, temp_suffix, checkpoint_suffix):
             area.spaces.active.image = image_og
             break
 
-    copyUVMAP(input_uv, checkpoint_suffix, input_image)
-    uvmap_copy = copyUVMAP(input_uv, temp_suffix, input_image)
+    copyUVMAP(input_uv, checkpoint_suffix, input_image)[0]
+    uvmap_copy = copyUVMAP(input_uv, temp_suffix, input_image)[0]
     for obj in bpy.context.scene.objects:
         if obj.type == 'MESH':  # Ensure the object is a mesh
             for uv_map in obj.data.uv_layers:
@@ -318,7 +323,7 @@ def Stop(input_image, input_uv, temp_suffix, uvmap_copy_name, margin_size, is_ba
             transfer_pixels(input_image + temp_suffix, input_image, True)  
             print("################################################")
             print("Transfered Pixels!")
-            print(uvnode_of_copy_pms)
+            print(uvnode_of_copy_pms.uv_map)
             if uvnode_of_copy_pms is not None:
                 transfer_uv(uvnode_of_copy_pms.uv_map, input_uv)
             else:
