@@ -228,12 +228,16 @@ def Stop(input_image, input_uv, temp_suffix, uvmap_copy_name, margin_size, is_ba
     image_node_of_og_tex_pms = None
     imgae_node_of_copy_pms = None
 
+
     if is_bakefullchain == False:
         matching_objects = get_image_users(input_image)
         copy_texture = copyTexture(input_image, temp_suffix)
 
         bpy.ops.object.select_all(action='DESELECT')
         for member in matching_objects:
+            if member.hide_get() is True:
+                member.hide_set(False)
+                og_hidden = member
             member.select_set(True)
 
        # Get node tree ref from all materials
@@ -339,7 +343,12 @@ def Stop(input_image, input_uv, temp_suffix, uvmap_copy_name, margin_size, is_ba
             obj.data.uv_layers.active = now_active
 
     bpy.ops.object.select_all(action='DESELECT')
-    og_obj.select_set(True)
+    for obj in matching_objects:
+        try:
+            og_hidden.hide_set(True)
+        except:
+            pass
+        og_obj.select_set(True)
     bpy.context.view_layer.objects.active = og_obj
 
     uvnode_of_copy_pms = None
@@ -521,7 +530,7 @@ class Select_all_image_users(bpy.types.Operator):
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.select_all(action='DESELECT')
         for obj in image_users:
-            obj.hide_set(False)
+            #obj.hide_set(False)
             obj.select_set(True)
         bpy.ops.object.mode_set(mode='EDIT')
 
@@ -760,7 +769,7 @@ class RecOperator(bpy.types.Operator):
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.select_all(action='DESELECT')
         for obj7 in matching_objects:
-            obj7.hide_set(False)               
+            #obj7.hide_set(False)               
             obj7.select_set(True)
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.mesh.select_all(action='DESELECT')
