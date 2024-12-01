@@ -342,14 +342,14 @@ def Stop(input_image, input_uv, temp_suffix, uvmap_copy_name, margin_size, is_ba
             now_active = obj.data.uv_layers.get(input_uv)
             obj.data.uv_layers.active = now_active
 
-    bpy.ops.object.select_all(action='DESELECT')
-    for obj in matching_objects:
-        try:
-            og_hidden.hide_set(True)
-        except:
-            pass
-        og_obj.select_set(True)
-    bpy.context.view_layer.objects.active = og_obj
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in matching_objects:
+            try:
+                og_hidden.hide_set(True)
+            except:
+                pass
+            og_obj.select_set(True)
+        bpy.context.view_layer.objects.active = og_obj
 
     uvnode_of_copy_pms = None
     uvnode_of_og_tex_pms = None
