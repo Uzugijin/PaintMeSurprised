@@ -676,7 +676,7 @@ class UV_request(bpy.types.Operator):
 class UVPixelCounter(bpy.types.Operator):
     bl_idname = "uv.auto_pixel_counter"
     bl_label = "Show Pixel Coverage"
-    bl_description = "Automatically counts pixels in selected UV faces"
+    bl_description = "Counts pixels in selected UV faces"
     bl_options = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
